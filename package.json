@@ -16,7 +16,7 @@
     "formidable": "^3.5.1",
     "jotai": "^2.5.1",
     "lucide-react": "^0.292.0",
-    "next": "14.0.3",
+    "next": "^14.0.3",
     "openai": "^4.19.0",
     "react": "^18",
     "react-dom": "^18",
