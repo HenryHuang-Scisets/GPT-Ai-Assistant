@@ -35,13 +35,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Create a ReadStream from the file
-      const fileStream = createReadStream(file.filepath);
+      // file.newFilename = file.originalFilename ?? 'new-file.txt';
+      // console.log("file: ", file);
+      // console.log("filePath: ", file.filepath);
+      const fileStream = createReadStream('C:\\Users\\jingh\\Downloads\\tsla-8k_20230419-gen.pdf');
 
       const openai = new OpenAI();
       const response = await openai.files.create({
         file: fileStream, // Use the ReadStream for uploading
         purpose: "assistants",
       });
+
+      // const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll("vs_uvhffAp6RNNslxPQ9sQLx6Ck", { files: [fileStream] });
 
       res.status(200).json({ file: response });
     } catch (e) {

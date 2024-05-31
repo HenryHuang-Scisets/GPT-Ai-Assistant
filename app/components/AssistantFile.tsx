@@ -42,6 +42,7 @@ function AssistantFile() {
       // Create a FormData object and append the file
       const formData = new FormData();
       formData.append("file", file);
+      console.log("file: ", file); // text.txt
 
       // Send the FormData object directly
       const response = await axios.post<{ file: FileObject }>(

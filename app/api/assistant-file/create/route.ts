@@ -6,6 +6,8 @@ export async function GET(request: NextRequest) {
   const assistantId = searchParams.get("assistantId");
   const fileId = searchParams.get("fileId");
 
+  console.log("fileId: ", fileId)
+
   if (!assistantId)
     return Response.json(
       { error: "No assistant id provided" },
@@ -17,16 +19,24 @@ export async function GET(request: NextRequest) {
   const openai = new OpenAI();
 
   try {
-    const assistantFile = await openai.beta.assistants.files.create(
-      assistantId,
-      {
-        file_id: fileId,
-      }
-    );
+    // Step 1: Add the file to the vector store
+    // const myVectorStoreFile = await openai.beta.vectorStores.files.create(
+    //   "vs_cQoCDBPYeLNwPMPms0tSNPjR",
+    //   {
+    //     file_id: fileId
+    //   }
+    // );
 
-    console.log(assistantFile);
+    // console.log(myVectorStoreFile);
 
-    return Response.json({ assistantFile: assistantFile });
+    // Step 2: Update the assistant to use the new vector store
+    const updatedAssistant = openai.beta.assistants.update(assistantId, {
+      tool_resources: { file_search: { vector_store_ids: ["vs_cQoCDBPYeLNwPMPms0tSNPjR"] } },
+    });
+
+    console.log(updatedAssistant);    
+
+    return Response.json({ assistantFile: updatedAssistant });
   } catch (e) {
     console.log(e);
     return Response.json({ error: e });
