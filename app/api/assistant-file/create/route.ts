@@ -20,18 +20,18 @@ export async function GET(request: NextRequest) {
 
   try {
     // Step 1: Add the file to the vector store
-    // const myVectorStoreFile = await openai.beta.vectorStores.files.create(
-    //   "vs_cQoCDBPYeLNwPMPms0tSNPjR",
-    //   {
-    //     file_id: fileId
-    //   }
-    // );
+    const myVectorStoreFile = await openai.beta.vectorStores.files.create(
+      "vs_pURmAxXe5Q9kVfWpPVVjo0cp",
+      {
+        file_id: fileId
+      }
+    );
 
-    // console.log(myVectorStoreFile);
+    console.log(myVectorStoreFile);
 
     // Step 2: Update the assistant to use the new vector store
     const updatedAssistant = openai.beta.assistants.update(assistantId, {
-      tool_resources: { file_search: { vector_store_ids: ["vs_cQoCDBPYeLNwPMPms0tSNPjR"] } },
+      tool_resources: { file_search: { vector_store_ids: ["vs_pURmAxXe5Q9kVfWpPVVjo0cp"] } },
     });
 
     console.log(updatedAssistant);    

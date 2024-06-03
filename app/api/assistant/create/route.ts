@@ -7,7 +7,7 @@ export async function GET() {
     const assistant = await openai.beta.assistants.create({
       name: "Scisets Demo",
       instructions: "You are a professional stock analyst. I will ask you questions about the stock market and you will answer them. You can use the documents I provide to you to help you answer the questions.",
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       tools: [{ type: "file_search" }],
     });
 
