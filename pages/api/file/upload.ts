@@ -38,13 +38,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Create a ReadStream from the file
-      // file.newFilename = file.originalFilename ?? 'new-file.txt';
-      // console.log("file: ", file);
-      // console.log("filePath: ", file.filepath);
       const newPath = `${file.filepath.substring(0, file.filepath.lastIndexOf('\\') + 1)}${file.originalFilename}`;
       await renameAsync(file.filepath, newPath);
-      const fileStream = createReadStream(newPath);
-      // const fileStream = createReadStream('C:\\Users\\jingh\\Downloads\\tsla-8k_20230419-gen.pdf');
+      const fileStream = createReadStream(newPath);      
 
       const openai = new OpenAI();
       const response = await openai.files.create({
