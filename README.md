@@ -2,20 +2,13 @@
 
 This project demonstrates how to create an OpenAI Assistant with file search capabilities using the OpenAI API. The assistant can answer questions using proprietary documents by leveraging vector search.
 
-  
-
 ## Getting Started
-
-  
-
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-  
 
 ### Prerequisites
 
 Before running the project, make sure you have the following installed:
-
  - Node.js npm or
  - yarn
 
@@ -32,11 +25,19 @@ pnpm install
 bun install
 ```
 
-2. Create a `.env.local` file in the root directory and add your OpenAI API key:
+2. With the install dependencies, also install openai dependencies: 
 ```bash
-NEXT_PUBLIC_OPENAI_API_KEY=your-openai-api-key
+npm install openai
+# or
+yarn add openai
 ```
-3. Run the development server:
+
+3. Create a `.env.local` file in the root directory and add your OpenAI API key:
+```bash
+OPENAI_API_KEY=your-openai-api-key
+```
+
+4. Run the development server:
 ```bash
 npm  run  dev
 # or
@@ -47,13 +48,7 @@ pnpm  dev
 bun  dev
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-  
-
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-  
-
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
 ## Creating an OpenAI Assistant
@@ -78,25 +73,44 @@ async function main() {
 main();
 ```
 
-### Step 2: Upload Files and Add Them to a Vector Store
+### Step 2: Upload Files you would like to add for file_search
 
-Upload your files and create a Vector Store to contain them. Poll its status until all files are out of the `in_progress` state.
+Use the form to upload your files for file_search
 
 ```javascript
-const fileStreams = ["edgar/goog-10k.pdf", "edgar/brka-10k.txt"].map((path) =>
-  fs.createReadStream(path),
-);
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  const form = new IncomingForm();
 
-// Create a vector store including our two files.
-let vectorStore = await openai.beta.vectorStores.create({
-  name: "Financial Statement",
-});
+  form.parse(req, async (err, fields, files) => {
+    try {
+      const fileArray = Array.isArray(files.file) ? files.file : [files.file]
+      // In this example, I only upload the first
+      const file = fileArray[0];
 
-await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, fileStreams);
+      // Create a ReadStream from the file
+      const newPath = `${file.filepath.substring(0, file.filepath.lastIndexOf('\\') + 1)}${file.originalFilename}`;
+      await renameAsync(file.filepath, newPath);
+      const fileStream = createReadStream(newPath);      
+
+      const openai = new OpenAI();
+      // Create a vector store including our two files.
+      let vectorStore = await openai.beta.vectorStores.create({
+      name: "Financial Statement",
+      });
+    
+      const response = await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, fileStreams);
+
+      res.status(200).json({ file: response });
+    } catch (e) {
+      res
+        .status(500)
+        .json({ error: e instanceof Error ? e.message : "Unknown error" });
+    }
+  });
+}
 ```
 
 ### Step 3: Update the Assistant to Use the New Vector Store
-
 Update the assistant’s `tool_resources` with the new vector store ID.
 
 ```javascript
@@ -164,9 +178,13 @@ const stream = openai.beta.threads.runs
 ## Project Structure
 
 -   **`app/page.tsx`**: Main page component.
--   **`pages/api/file/upload.ts`**: API route for file uploads.
--   **`components/SlideOvers.tsx`**: Component to display the list of assistants.
--   **`api/listAssistantsApi.ts`**: API hooks for fetching the list of assistants.
+-   **`app/api/assistant`**: API routes for creating, deleting, listing and modifying an ai-assistant.
+-   **`pages/api/file/upload.ts`**: API routes for uploading files for an ai-assistant.
+-   **`app/api/assistant-file`**: API routes for creating, deleting and listing files for an ai-assistant.
+-   **`app/api/thread`**: API routes for creating and deleting message threads for an ai-assistant.
+-   **`app/api/run`**: API routes for canceling, creating and retriving messages for an ai-assistant thread.
+-   **`app/api/message`**: API routes for creating and listing messages for an ai-assistant thread.
+-   **`app/components`**: Frontend components for the ai-assistant create, upload messgae and fun features. 
 
 ## Learn More
 
